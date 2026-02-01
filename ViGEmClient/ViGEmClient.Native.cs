@@ -39,6 +39,12 @@ public sealed partial class ViGEmClient
     internal static extern PVIGEM_TARGET vigem_target_ds4_alloc();
 
     [DllImport("vigemclient.dll", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern PVIGEM_TARGET vigem_target_ds_alloc();
+
+    [DllImport("vigemclient.dll", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern PVIGEM_TARGET vigem_target_ds_edge_alloc();
+
+    [DllImport("vigemclient.dll", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
     internal static extern void vigem_target_free(
         PVIGEM_TARGET target);
 
@@ -71,11 +77,21 @@ public sealed partial class ViGEmClient
         PVIGEM_DS4_NOTIFICATION notification);
 
     [DllImport("vigemclient.dll", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern VIGEM_ERROR vigem_target_ds_register_notification(
+        PVIGEM_CLIENT vigem,
+        PVIGEM_TARGET target,
+        PVIGEM_DS_NOTIFICATION notification);
+
+    [DllImport("vigemclient.dll", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
     internal static extern void vigem_target_x360_unregister_notification(
         PVIGEM_TARGET target);
 
     [DllImport("vigemclient.dll", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
     internal static extern void vigem_target_ds4_unregister_notification(
+        PVIGEM_TARGET target);
+
+    [DllImport("vigemclient.dll", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern void vigem_target_ds_unregister_notification(
         PVIGEM_TARGET target);
 
     [DllImport("vigemclient.dll", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
@@ -115,6 +131,19 @@ public sealed partial class ViGEmClient
         DS4_REPORT_EX report);
 
     [DllImport("vigemclient.dll", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern VIGEM_ERROR vigem_target_ds_update(
+        PVIGEM_CLIENT vigem,
+        PVIGEM_TARGET target,
+        DS_REPORT report);
+
+    [DllImport("vigemclient.dll", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern VIGEM_ERROR vigem_target_ds_update_ex(
+        PVIGEM_CLIENT vigem,
+        PVIGEM_TARGET target,
+        byte[] report,
+        uint size);
+
+    [DllImport("vigemclient.dll", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
     private static extern uint vigem_target_get_index(
         PVIGEM_TARGET target);
 
@@ -144,6 +173,19 @@ public sealed partial class ViGEmClient
         PVIGEM_TARGET target,
         UInt32 milliseconds,
         ref DS4_AWAIT_OUTPUT_BUFFER buffer);
+
+    [DllImport("vigemclient.dll", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern VIGEM_ERROR vigem_target_ds_await_output_report(
+        PVIGEM_CLIENT vigem,
+        PVIGEM_TARGET target,
+        ref DS_OUTPUT_BUFFER buffer);
+
+    [DllImport("vigemclient.dll", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern VIGEM_ERROR vigem_target_ds_await_output_report_timeout(
+        PVIGEM_CLIENT vigem,
+        PVIGEM_TARGET target,
+        UInt32 milliseconds,
+        ref DS_OUTPUT_BUFFER buffer);
 
     internal enum VIGEM_ERROR : UInt32
     {
@@ -222,7 +264,17 @@ public sealed partial class ViGEmClient
         //
         // Sony DualShock 4 (wired)
         // 
-        DualShock4Wired = 2
+        DualShock4Wired = 2,
+
+        //
+        // Sony DualSense (wired)
+        //
+        DualSenseWired = 3,
+
+        //
+        // Sony DualSense Edge (wired)
+        //
+        DualSenseEdgeWired = 4
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -231,6 +283,35 @@ public sealed partial class ViGEmClient
         public byte Red;
         public byte Green;
         public byte Blue;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct DS_REPORT
+    {
+        public byte bThumbLX;
+        public byte bThumbLY;
+        public byte bThumbRX;
+        public byte bThumbRY;
+        public ushort wButtons;
+        public byte bSpecial;
+        public byte bTriggerL;
+        public byte bTriggerR;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct DS_LIGHTBAR_COLOR
+    {
+        public byte Red;
+        public byte Green;
+        public byte Blue;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    [SuppressMessage("ReSharper", "FieldCanBeMadeReadOnly.Global")]
+    internal struct DS_OUTPUT_BUFFER
+    {
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 64)]
+        public byte[] Buffer;
     }
 
     [UnmanagedFunctionPointer(CallingConvention.StdCall)]
@@ -249,5 +330,14 @@ public sealed partial class ViGEmClient
         byte LargeMotor,
         byte SmallMotor,
         DS4_LIGHTBAR_COLOR LightbarColor,
+        PVIGEM_USER_DATA UserData);
+
+    [UnmanagedFunctionPointer(CallingConvention.StdCall)]
+    internal delegate void PVIGEM_DS_NOTIFICATION(
+        PVIGEM_CLIENT Client,
+        PVIGEM_TARGET Target,
+        byte LargeMotor,
+        byte SmallMotor,
+        DS_LIGHTBAR_COLOR LightbarColor,
         PVIGEM_USER_DATA UserData);
 }

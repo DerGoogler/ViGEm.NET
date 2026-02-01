@@ -47,4 +47,22 @@ public sealed partial class ViGEmClient
     {
         return new DualShock4Controller(this, vendorId, productId);
     }
+
+    /// <summary>
+    ///     Allocates a new virtual DualSense Controller device on the bus.
+    /// </summary>
+    /// <returns>A new virtual DualSense Controller device.</returns>
+    public IDualSenseController CreateDualSenseController()
+    {
+        return new DualSenseController(this);
+    }
+
+    /// <summary>
+    ///     Allocates a new virtual DualSense Edge Controller device on the bus.
+    /// </summary>
+    /// <returns>A new virtual DualSense Edge Controller device.</returns>
+    public IDualSenseController CreateDualSenseEdgeController()
+    {
+        return new DualSenseEdgeController(this);
+    }
 }
